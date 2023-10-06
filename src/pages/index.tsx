@@ -4,6 +4,11 @@ import { SignInButton } from "@clerk/nextjs";
 import { SignOutButton } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import {RouterOutputs} from "../utils/api";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime"
+
+dayjs.extend(relativeTime);
+
       
 
 import { api } from "~/utils/api";
@@ -33,7 +38,7 @@ const PostView = (props: PostWithUser) => {
 
     <div className="flex flex-col ">
       <div className="flex gap-2 font-bold text-slate-300"><span>{`@${author.username} `}</span>
-      <span> {` -  1 hours ago`}</span>    
+      <span> {` ${dayjs(post.createdAt).fromNow()}`}</span>    
       </div>
     <span>{post.content}</span>
     
@@ -71,6 +76,7 @@ export default function Home() {
         )}
         {!!user.isSignedIn && <CreatePostWizard />}
       </div>
+      
       <div className="flex flex-col">
         {data?.map((fullPost)=> (
           <PostView {...fullPost} key={fullPost.post.id}/>
