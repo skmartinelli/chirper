@@ -13,10 +13,20 @@ dayjs.extend(relativeTime);
 
 import { api } from "~/utils/api";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 const CreatePostWizard = () => {
   const {user} = useUser();
 
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+  const {mutate, isLoading: isPosting} = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    }
+  });
   console.log(user);
 
   if (!user) return null;
@@ -25,7 +35,24 @@ const CreatePostWizard = () => {
     <img src= {user.imageUrl} 
     alt="Profile image" 
     className=" h-20 w-20 rounded-full"/>
-    <input placeholder="Type something fun!" className="bg-transparent grow outline-none"></input>
+    <input 
+    placeholder="Type something fun!" 
+    className="bg-transparent grow outline-none"
+    type="text"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    disabled={isPosting}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') {
+        mutate({ content: input });
+      }
+    }
+  }
+    />
+
+    <button onClick={() => mutate({ content: input})}> Post</button>
+ 
+
   </div>  
 
 }
@@ -41,7 +68,7 @@ const PostView = (props: PostWithUser) => {
       <div className="flex gap-2 font-bold text-slate-300"><span>{`@${author.username} `}</span>
       <span> {` ${dayjs(post.createdAt).fromNow()}`}</span>    
       </div>
-    <span>{post.content}</span>
+    <span className="text-xl">{post.content}</span>
     
     </div>
   </div>)
